@@ -1,8 +1,17 @@
+#ifdef _WIN32
+#define CLEAR "cls"
+#endif
+
+#ifdef linux
+#define CLEAR "clear"
+#endif
+
 #include<stdio.h>
 #include<stdbool.h>
 #include<stdlib.h>
 #include<string.h>
 #include<time.h>
+
 
 struct settings
 {
@@ -49,9 +58,9 @@ int main()
             memset(minefield,0, sett.m * sett.n * sizeof(int));
 
             populateTable(sett,minefield);
-            //system("clear");
+            system(CLEAR);
             printf("\nThe minefield you got looks like this: \n");
-            printfMatrix(sett.m,sett.n, minefield);
+            printfMatrix(sett.n,sett.m, minefield);
             printf("\n");
             printf("You still cant play but would be appreciated if youd check the validity of the matrix\n");
             printf("Feel free to generate another one\n\n");
@@ -194,13 +203,17 @@ void populateTable(struct settings set, int a[set.n][set.m])
             for(jj = -1; jj <= 1; jj++)
             {
                 if(freeSpace[random].x + jj < 0 || freeSpace[random].x + jj >= set.m) continue;
-
-                if(j == 0 && jj == 0) continue;
-
                 if(a[freeSpace[random].y + j][freeSpace[random].x + jj] != -1) a[freeSpace[random].y + j][freeSpace[random].x + jj]++;
             }
         }
-        
+        system(CLEAR);
+        printf("%d more mines left\n", mineNum-1);
+        printfMatrix(set.n, set.m, a);
+        printf("\nPress enter to continue: ");
+        char c;
+        scanf("%c", &c);
+        clear();
+
         while(random < freeSpaceSize - 1)
         {
             swapCoor(&freeSpace[random], &freeSpace[random + 1]);
