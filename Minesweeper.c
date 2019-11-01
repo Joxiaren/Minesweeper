@@ -87,22 +87,32 @@ void printfMatrix(int n, int m, int a[n][m])
 bool printfMinefield(int n, int m, int a[n][m])
 {
     int j,jj;
+    char  blank[2] = "";
+    if(n >= 10 || m >= 10) strcpy(blank, " ");
+
     bool win = true;
-    printf("   ");
-    for(j = 0; j < m; j++) printf("%d ",j+1);
-    printf("\n");
+    printf("   %s",blank);
+    for(j = 0; j < m; j++)
+    {
+        if(j < 9) printf("%d %s",j+1,blank);
+        else printf("%d%s",j+1,blank);
+    } 
+    printf("\n\n");
+
     for(j = 0; j < n; j++)
     {
-        printf("%d  ",j+1);
+        if(j < 9) printf("%d  %s",j+1,blank);
+        else printf("%d %s",j+1,blank);
         for(jj = 0; jj < m; jj++)
         {
-            if(a[j][jj] >= 10) printf("%d ",a[j][jj] - 10);
+            if(a[j][jj] >= 10) printf("%d %s",a[j][jj] - 10,blank);
+            else if(a[j][jj] == 9) printf("* %s",blank);
             else if(a[j][jj] >= 0)
             {
-                printf("# ");
+                printf("# %s",blank);
                 win = false;
             } 
-            else printf("# ");
+            else printf("# %s",blank);
         }
         printf("\n");
     }
@@ -132,6 +142,7 @@ struct settings inputSettings()
 {
     struct settings set;
     int select;
+    system(CLEAR);
     while(1) //while loop for inputing n(width)
     {
         printf("Choose table width (3 <= n <= 15): ");
@@ -150,6 +161,7 @@ struct settings inputSettings()
         if(set.m >= 3 && set.m <= 15) break;
         else printf("Try not to guess the correct input\n");
     }
+    system(CLEAR);
     while(1) //while loop for inputing the number of mines
     {
         printf("Choose difficulty(number of mines)\n");
@@ -228,7 +240,7 @@ void populateTable(struct coordinates c, struct settings set, int a[set.n][set.m
         }
         system(CLEAR);
        
-        /*
+        /* DEBUG
         printf("%d more mines left\n", mineNum-1);
         printfMatrix(set.n, set.m, a);
         printf("\nPress enter to continue: ");
@@ -255,51 +267,42 @@ void gameLoop(struct settings set, int a[set.n][set.m])
     while(1)
     {
         system(CLEAR);
-        //printfMatrix(set.n,set.m,a);
         printf("\n");
         printfMinefield(set.n,set.m,a);
-        //printf("\nChoose an option:\n");
-        //printf("1. Open field\n");
-        //printf("2. Mark mine\n");
 
-        //scanf("%d", &select);
-        select = 1;
-        if(select == 1)
-        {       
-            while(1)
-            {
-                printf("Input coordinates(1 <= x <= %d, 1 <= y <= %d): \n",set.m,set.n);
-                scanf("%d%d", &x, &y);
-                clear();
-                system(CLEAR);
-                if(x >= 1 && x <= set.m && y >= 1 && y <= set.n) break;
-                else printf("sigh\n");
-            }
-            struct coordinates c = setCoordinates(x-1,y-1);
-            
-            if(firstTime)
-            {
-                populateTable(c, set,a);
-                firstTime = false;
-            }
-            result = openField(set, a, c);
-            if(printfMinefield(set.n, set.m, a) && result != -1  )
-            {
-                printf("\nCongrats!!! You Win!!!\n\n");
-                break;
-            }
-            else if(result == -1)
-            {
-                printf("\nYou Lose :<\n\n");
-                break;
-            }
+        while(1)
+        {
+            printf("\nInput coordinates(1 <= x <= %d, 1 <= y <= %d): \n",set.m,set.n);
+            scanf("%d%d", &x, &y);
+            clear();
+            system(CLEAR);
+            if(x >= 1 && x <= set.m && y >= 1 && y <= set.n) break;
+            else printf("sigh\n");
         }
+        struct coordinates c = setCoordinates(x-1,y-1);
+        
+        if(firstTime)
+        {
+            populateTable(c, set,a);
+            firstTime = false;
+        }
+        result = openField(set, a, c);
+        if(printfMinefield(set.n, set.m, a) && result != -1  )
+        {
+            printf("\nCongrats!!! You Win!!!\n\n");
+            break;
+        }
+        else if(result == 9)
+        {
+            printf("\nYou Lose :<\n\n");
+            break;
+        }
+        
     }
 }
 int openField(struct settings set, int a[set.n][set.m], struct coordinates c)
 {
     int j,jj;
-    int tired;
     if(a[c.y][c.x] == 0)
     {
         a[c.y][c.x] += 10;
@@ -314,7 +317,7 @@ int openField(struct settings set, int a[set.n][set.m], struct coordinates c)
 
                 if(a[newC.y][newC.x] < 10 && a[newC.y][newC.x] > -1) 
                 {
-                   tired = openField(set,a,newC);
+                   openField(set,a,newC);
                 }
             }
         }
@@ -325,13 +328,12 @@ int openField(struct settings set, int a[set.n][set.m], struct coordinates c)
     }
     else if(a[c.y][c.x] == -1)
     {
-        printf("boom\n\n");
+        a[c.y][c.x] += 10;
+        printf("Boom!!!\n\n");
     }
     else
     {
         printf("cant open field\n\n");
     }
-    
-
     return a[c.y][c.x];
 }
